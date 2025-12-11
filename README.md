@@ -1,8 +1,8 @@
-Insights Hub – Customer Feedback & Insights Platform
+# Insights Hub – Customer Feedback & Insights Platform
 
 A serverless, cloud-native application for collecting customer feedback and generating actionable insights using AWS services.
 
-Tech Stack
+## Tech Stack
 
 Frontend: Simple HTML/JS feedback form
 
@@ -16,7 +16,7 @@ Analytics: Athena
 
 Visualization & AI Assistant: QuickSight + Amazon Q
 
-Features
+## Features
 
 Customer feedback form
 
