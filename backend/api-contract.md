@@ -46,7 +46,7 @@ The frontend sends the following JSON payload:
     "locale": "en-US"
   }
 }
-
+```
 
 2.1 Field Definitions
 
@@ -76,6 +76,7 @@ year, month, day (derived from timestamp)
 Write the enriched record to S3 using the defined folder structure.
 
 3.1 Example Enriched Record (written to S3)
+```
 {
   "feedback_id": "fb-20251212-0001",
   "timestamp": "2025-12-12T15:30:45Z",
@@ -90,17 +91,17 @@ Write the enriched record to S3 using the defined folder structure.
   "month": "12",
   "day": "12"
 }
-
+```
 
 The record is stored under a date-partitioned path, for example:
 
-s3://insights-hub-feedback-dev/raw/year=2025/month=12/day=12/feedback-2025-12-12.json
+``` s3://insights-hub-feedback-dev/raw/year=2025/month=12/day=12/feedback-2025-12-12.json ```
 
 ## 4. Validation Rules
 
 The backend enforces these rules:
 
-4.1 rating
+### 4.1 rating
 
 Required
 
@@ -108,7 +109,7 @@ Type: integer
 
 Allowed values: 1, 2, 3, 4, 5
 
-4.2 feedback_text
+### 4.2 feedback_text
 
 Required
 
@@ -118,7 +119,7 @@ Must be non-empty
 
 Suggested max length: 2000 characters
 
-4.3 topic
+### 4.3 topic
 
 Optional
 
@@ -126,7 +127,7 @@ Type: string
 
 Example values: delivery, checkout, payment, support
 
-4.4 metadata
+### 4.4 metadata
 
 Optional
 
@@ -138,7 +139,7 @@ If any required field is invalid or missing, the API returns a 400 Bad Request.
 
 ## 5. Responses
 5.1 Success Response
-
+```
 Status: 200 OK
 
 {
@@ -166,6 +167,7 @@ Status: 500 Internal Server Error
 {
   "message": "An unexpected error occurred while submitting feedback"
 }
+```
 
 ## 6. End-to-End Flow (Frontend → API → Lambda → S3)
 
@@ -182,9 +184,9 @@ Validates the request.
 Enriches the payload with feedback_id, timestamp, year, month, day.
 
 Writes the record into Amazon S3 under:
-
+```
 /raw/year=YYYY/month=MM/day=DD/
-
+```
 
 Lambda returns a success or error response.
 
