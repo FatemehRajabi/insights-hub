@@ -15,6 +15,23 @@ The browser sends a `POST /feedback` request to API Gateway, which triggers the 
 
 ---
 
+# API Contract – Feedback Submission
+
+This document defines the API used by the frontend to submit customer feedback to Insights Hub.
+
+---
+
+## 1. Endpoint Overview
+
+**Method:** `POST`  
+**Path:** `/feedback`  
+**Protocol:** HTTPS (via Amazon API Gateway)  
+**Content-Type:** `application/json`
+
+The browser sends a `POST /feedback` request to API Gateway, which triggers the `ingest-feedback` Lambda function.
+
+---
+
 ## 2. Request Schema (from Frontend)
 
 The frontend sends the following JSON payload:
@@ -29,6 +46,7 @@ The frontend sends the following JSON payload:
     "locale": "en-US"
   }
 }
+
 
 2.1 Field Definitions
 
