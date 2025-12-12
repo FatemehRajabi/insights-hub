@@ -30,7 +30,7 @@ The frontend sends the following JSON payload:
   }
 }
 
-### 2.1 Field Definitions
+2.1 Field Definitions
 
 | Field         | Type    | Required | Description                                                                    |
 | ------------- | ------- | -------- | ------------------------------------------------------------------------------ |
@@ -82,7 +82,7 @@ s3://insights-hub-feedback-dev/raw/year=2025/month=12/day=12/feedback-2025-12-12
 
 The backend enforces these rules:
 
-### 4.1 rating
+4.1 rating
 
 Required
 
@@ -90,7 +90,7 @@ Type: integer
 
 Allowed values: 1, 2, 3, 4, 5
 
-### 4.2 feedback_text
+4.2 feedback_text
 
 Required
 
@@ -100,7 +100,7 @@ Must be non-empty
 
 Suggested max length: 2000 characters
 
-### 4.3 topic
+4.3 topic
 
 Optional
 
@@ -108,7 +108,7 @@ Type: string
 
 Example values: delivery, checkout, payment, support
 
-### 4.4 metadata
+4.4 metadata
 
 Optional
 
@@ -119,7 +119,7 @@ Contains simple key–value pairs (e.g., strings, numbers, booleans)
 If any required field is invalid or missing, the API returns a 400 Bad Request.
 
 ## 5. Responses
-### 5.1 Success Response
+5.1 Success Response
 
 Status: 200 OK
 
@@ -129,7 +129,7 @@ Status: 200 OK
   "timestamp": "2025-12-12T15:30:45Z"
 }
 
-### 5.2 Client Error – Invalid Input
+5.2 Client Error – Invalid Input
 
 Status: 400 Bad Request
 
@@ -141,7 +141,7 @@ Status: 400 Bad Request
   ]
 }
 
-### 5.3 Server Error – Unexpected Failure
+5.3 Server Error – Unexpected Failure
 
 Status: 500 Internal Server Error
 
