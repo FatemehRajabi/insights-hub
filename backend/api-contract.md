@@ -30,7 +30,8 @@ The frontend sends the following JSON payload:
   }
 }
 
-2.1 Field Definitions
+### 2.1 Field Definitions
+
 | Field         | Type    | Required | Description                                                                    |
 | ------------- | ------- | -------- | ------------------------------------------------------------------------------ |
 | rating        | integer | yes      | Customer rating (1–5) representing satisfaction.                               |
