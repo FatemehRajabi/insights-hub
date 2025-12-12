@@ -12,6 +12,8 @@ Compute: AWS Lambda
 
 Storage: Amazon S3
 
+Tables: AWS Glue Data Catalog
+
 Analytics: Athena
 
 Visualization & AI Assistant: QuickSight + Amazon Q
@@ -24,6 +26,8 @@ API to ingest feedback
 
 Store data in S3 (structured JSON/CSV)
 
-Query data using Athena
+Query data using Athena through the Glue Data Catalog
 
-Simple insights demos
+Dashboards and insights in QuickSight
+
+Natural language Q&A powered by Amazon Q
