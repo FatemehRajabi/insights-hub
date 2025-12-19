@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Insights Hub – Feedback Form</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <h1>Customer Feedback</h1>
 
@@ -20,23 +23,12 @@
     <br /><br />
 
     <label for="feedback_text">Feedback:</label><br />
-    <textarea
-      id="feedback_text"
-      name="feedback_text"
-      rows="4"
-      cols="50"
-      required
-      placeholder="Tell us what worked well or what could be improved..."
-    ></textarea>
+    <textarea id="feedback_text" name="feedback_text" rows="4" cols="50" required
+      placeholder="Tell us what worked well or what could be improved..."></textarea>
     <br /><br />
 
     <label for="topic">Topic (optional):</label>
-    <input
-      type="text"
-      id="topic"
-      name="topic"
-      placeholder="e.g., delivery, checkout, support"
-    />
+    <input type="text" id="topic" name="topic" placeholder="e.g., delivery, checkout, support" />
     <br /><br />
 
     <button type="submit">Submit Feedback</button>
@@ -74,5 +66,5 @@
     });
   </script>
 </body>
-</html>
 
+</html>
