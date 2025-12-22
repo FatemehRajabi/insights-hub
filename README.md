@@ -31,3 +31,14 @@ Query data using Athena through the Glue Data Catalog
 Dashboards and insights in QuickSight
 
 Natural language Q&A powered by Amazon Q
+
+## Tagging Strategy
+
+All AWS resources for the InsightHub project follow a consistent tagging strategy to support cost tracking, environment separation, and ownership.
+
+| Tag Key     | Tag Value           |
+| ----------- | ------------------- |
+| Project     | InsightHub          |
+| Environment | Dev / Prod          |
+| Owner       | InsightHub-Team     |
+| CostCenter  | PerScholas-Capstone |
