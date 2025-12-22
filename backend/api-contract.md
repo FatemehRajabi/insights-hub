@@ -15,17 +15,6 @@ The browser sends a `POST /feedback` request to API Gateway, which triggers the 
 
 ---
 
-## 1. Endpoint Overview
-
-**Method:** `POST`  
-**Path:** `/feedback`  
-**Protocol:** HTTPS (via Amazon API Gateway)  
-**Content-Type:** `application/json`
-
-The browser sends a `POST /feedback` request to API Gateway, which triggers the `ingest-feedback` Lambda function.
-
----
-
 ## 2. Request Schema (from Frontend)
 
 The frontend sends the following JSON payload:
@@ -117,43 +106,54 @@ The record is stored under a date-partitioned path, for example:
 
 ## 4. Validation Rules
 
-The backend enforces these rules:
+The backend enforces these rules (via API Gateway request validation):
 
-### 4.1 rating
+### 4.1 survey_version
 
-Required
+- Required
+- Type: string
+- Allowed values: `short_v1`
 
-Type: integer
+### 4.2 ratings
 
-Allowed values: 1, 2, 3, 4, 5
+- Required
+- Type: object
+- All rating values must be integers between **1 and 10**
 
-### 4.2 feedback_text
+Required fields:
 
-Required
+- `ratings.overall_satisfaction`
+- `ratings.speed_satisfaction`
+- `ratings.recommend_likelihood`
 
-Type: string
+### 4.3 open_text
 
-Must be non-empty
+- Required
+- Type: object
 
-Suggested max length: 2000 characters
+Required fields:
 
-### 4.3 topic
+- `open_text.improve_one_thing`
+- `open_text.keep_doing_one_thing`
 
-Optional
+Each must:
 
-Type: string
+- Be non-empty strings
+- Max length: 2000 characters
 
-Example values: delivery, checkout, payment, support
+### 4.4 topic
 
-### 4.4 metadata
+- Optional
+- Type: string
+- Example values: `delivery`, `checkout`, `support`
 
-Optional
+### 4.5 metadata
 
-Type: object
+- Optional
+- Type: object
+- Contains simple key–value pairs (e.g., strings, numbers, booleans)
 
-Contains simple key–value pairs (e.g., strings, numbers, booleans)
-
-If any required field is invalid or missing, the API returns a 400 Bad Request.
+If any required field is missing or invalid, the API returns **400 Bad Request**.
 
 ## 5. Responses
 
@@ -175,9 +175,9 @@ Status: 400 Bad Request
 {
   "message": "Invalid request payload",
   "errors": [
-    "rating is required and must be an integer between 1 and 5",
-    "feedback_text is required"
-  ]
+  "ratings.overall_satisfaction must be an integer between 1 and 10",
+  "open_text.improve_one_thing is required"
+]
 }
 
 5.3 Server Error – Unexpected Failure
