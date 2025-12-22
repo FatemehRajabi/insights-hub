@@ -12,17 +12,26 @@ Each feedback item represents a **single submission** from a customer.
 
 ### 1.1 Fields
 
-| Field         | Type    | Required | Source            | Description                                                    |
-|--------------|---------|----------|-------------------|----------------------------------------------------------------|
-| feedback_id  | string  | yes      | Lambda            | Unique ID for the feedback entry (UUID).                      |
-| timestamp    | string  | yes      | Lambda            | ISO 8601 UTC timestamp when feedback is processed.            |
-| rating       | integer | yes      | Frontend          | Customer rating (1–5) representing satisfaction.              |
-| feedback_text| string  | yes      | Frontend          | Free-text feedback provided by the customer.                  |
-| topic        | string  | no       | Frontend          | topic or area the feedback is about (e.g., `checkout`, `delivery`). |
-| metadata     | object  | no       | Lambda/Frontend   | Optional extra fields (e.g., browser info, campaign, etc.).   |
-| year         | string  | yes      | Lambda (derived)  | Partition key for Athena, derived from `timestamp` (YYYY).    |
-| month        | string  | yes      | Lambda (derived)  | Partition key for Athena, derived from `timestamp` (MM).      |
-| day          | string  | yes      | Lambda (derived)  | Partition key for Athena, derived from `timestamp` (DD).      |
+| Field                            | Type    | Required | Source           | Description                                    |
+| -------------------------------- | ------- | -------: | ---------------- | ---------------------------------------------- |
+| `feedback_id`                    | string  |      yes | Lambda           | Unique ID (UUID) for the submission.           |
+| `submitted_at`                   | string  |      yes | Lambda           | ISO 8601 UTC timestamp when stored.            |
+| `survey_version`                 | string  |      yes | Frontend         | Survey version, e.g., `short_v1`.              |
+| `environment`                    | string  |       no | API/Lambda       | `dev` or `demo` (can be injected).             |
+| `ratings`                        | object  |      yes | Frontend         | Numeric ratings (1–10).                        |
+| `ratings.overall_satisfaction`   | integer |      yes | Frontend         | 1–10 overall satisfaction.                     |
+| `ratings.speed_satisfaction`     | integer |      yes | Frontend         | 1–10 speed satisfaction.                       |
+| `ratings.recommend_likelihood`   | integer |      yes | Frontend         | 1–10 likelihood to recommend.                  |
+| `open_text`                      | object  |      yes | Frontend         | Open-ended answers.                            |
+| `open_text.improve_one_thing`    | string  |      yes | Frontend         | What to improve.                               |
+| `open_text.keep_doing_one_thing` | string  |      yes | Frontend         | What to keep doing.                            |
+| `topic`                          | string  |       no | Frontend         | Optional topic like `delivery`, `support`.     |
+| `metadata`                       | object  |       no | Frontend/Lambda  | Optional context (userAgent, locale, etc.).    |
+| `metadata.userAgent`             | string  |       no | Frontend         | Browser user agent string.                     |
+| `metadata.locale`                | string  |       no | Frontend         | Browser locale.                                |
+| `year`                           | string  |      yes | Lambda (derived) | Partition: derived from `submitted_at` (YYYY). |
+| `month`                          | string  |      yes | Lambda (derived) | Partition: derived from `submitted_at` (MM).   |
+| `day`                            | string  |      yes | Lambda (derived) | Partition: derived from `submitted_at` (DD).   |
 
 ---
 
@@ -37,12 +46,20 @@ These are added by the Lambda function.
 
 ```json
 {
-  "rating": 4,
-  "feedback_text": "The checkout process was easy, but delivery was slow.",
+  "survey_version": "short_v1",
+  "ratings": {
+    "overall_satisfaction": 8,
+    "speed_satisfaction": 6,
+    "recommend_likelihood": 9
+  },
+  "open_text": {
+    "improve_one_thing": "Delivery was slow.",
+    "keep_doing_one_thing": "Staff were friendly."
+  },
   "topic": "delivery",
-    "metadata": {
-    "browser": "Chrome",
+  "metadata": {
+    "userAgent": "Mozilla/5.0 ...",
     "locale": "en-US"
   }
 }
-
+```
