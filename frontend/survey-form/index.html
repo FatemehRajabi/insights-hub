@@ -1,35 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <title>Insights Hub – Feedback Form</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-
 <body>
   <h1>Customer Feedback</h1>
 
   <form id="feedback-form">
-    <label for="rating">Rating (1–5):</label>
-    <select id="rating" name="rating" required>
+    <label for="overall_satisfaction">Overall satisfaction (1–10):</label>
+    <select id="overall_satisfaction" name="overall_satisfaction" required>
       <option value="">Select…</option>
-      <option value="1">1 - Very dissatisfied</option>
+      <option value="1">1</option>
       <option value="2">2</option>
-      <option value="3">3 - Neutral</option>
+      <option value="3">3</option>
       <option value="4">4</option>
-      <option value="5">5 - Very satisfied</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
     </select>
-    <br /><br />
 
-    <label for="feedback_text">Feedback:</label><br />
-    <textarea id="feedback_text" name="feedback_text" rows="4" cols="50" required
-      placeholder="Tell us what worked well or what could be improved..."></textarea>
-    <br /><br />
+    <label for="speed_satisfaction">Speed of service/support (1–10):</label>
+    <select id="speed_satisfaction" name="speed_satisfaction" required>
+      <option value="">Select…</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+    </select>
+
+    <label for="recommend_likelihood">Likelihood to recommend (1–10):</label>
+    <select id="recommend_likelihood" name="recommend_likelihood" required>
+      <option value="">Select…</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+    </select>
+
+    <label for="improve_one_thing">One thing we could do better:</label>
+    <textarea id="improve_one_thing" name="improve_one_thing" rows="3" required
+      placeholder="What should we improve?"></textarea>
+
+    <label for="keep_doing_one_thing">One thing you want us to keep doing:</label>
+    <textarea id="keep_doing_one_thing" name="keep_doing_one_thing" rows="3" required
+      placeholder="What should we keep doing?"></textarea>
 
     <label for="topic">Topic (optional):</label>
     <input type="text" id="topic" name="topic" placeholder="e.g., delivery, checkout, support" />
-    <br /><br />
 
     <button type="submit">Submit Feedback</button>
   </form>
@@ -41,30 +68,26 @@
       event.preventDefault();
 
       const payload = {
-        rating: parseInt(form.rating.value, 10),
-        feedback_text: form.feedback_text.value,
+        survey_version: "short_v1",
+        ratings: {
+          overall_satisfaction: parseInt(form.overall_satisfaction.value, 10),
+          speed_satisfaction: parseInt(form.speed_satisfaction.value, 10),
+          recommend_likelihood: parseInt(form.recommend_likelihood.value, 10),
+        },
+        open_text: {
+          improve_one_thing: form.improve_one_thing.value,
+          keep_doing_one_thing: form.keep_doing_one_thing.value,
+        },
         topic: form.topic.value || null,
         metadata: {
-          // simple example metadata
           userAgent: navigator.userAgent,
-          locale: navigator.language
-        }
+          locale: navigator.language,
+        },
       };
 
       console.log("Feedback", payload);
-
-      // In Week 2, we will replace this console.log with a real call to API Gateway:
-      // const response = await fetch("YOUR_API_GATEWAY_URL/feedback", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(payload),
-      // });
-      // const data = await response.json();
-      // alert(data.message);
-
       alert("Feedback captured in browser.");
+      form.reset(); // optional: clears form after submit
     });
   </script>
 </body>
-
-</html>
