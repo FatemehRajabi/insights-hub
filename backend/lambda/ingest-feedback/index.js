@@ -13,11 +13,31 @@ exports.handler = async (event) => {
     };
   }
 
-  // (Placeholder values) real logic comes in Week 2
+  // Basic shape validation (Week 2 level)
+  if (
+    !body.survey_version ||
+    !body.ratings ||
+    !body.open_text ||
+    typeof body.ratings.overall_satisfaction !== "number" ||
+    typeof body.ratings.speed_satisfaction !== "number" ||
+    typeof body.ratings.recommend_likelihood !== "number" ||
+    !body.open_text.improve_one_thing ||
+    !body.open_text.keep_doing_one_thing
+  ) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        message: "Invalid request payload",
+        error: "Missing or invalid required fields"
+      })
+    };
+  }
+
+  // Placeholder enrichment (real S3 logic comes in Week 3)
   const response = {
-    message: "Feedback received (Week 1 skeleton)",
+    message: "Feedback received",
     feedback_id: "placeholder-id",
-    timestamp: new Date().toISOString()
+    submitted_at: new Date().toISOString()
   };
 
   return {
