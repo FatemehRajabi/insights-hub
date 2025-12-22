@@ -39,6 +39,6 @@ All AWS resources for the InsightHub project follow a consistent tagging strateg
 | Tag Key     | Tag Value           |
 | ----------- | ------------------- |
 | Project     | InsightHub          |
-| Environment | Dev / Prod          |
+| Environment | dev / demo          |
 | Owner       | InsightHub-Team     |
 | CostCenter  | PerScholas-Capstone |
