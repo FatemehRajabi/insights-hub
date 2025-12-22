@@ -42,3 +42,26 @@ All AWS resources for the InsightHub project follow a consistent tagging strateg
 | Environment | dev / demo          |
 | Owner       | InsightHub-Team     |
 | CostCenter  | PerScholas-Capstone |
+
+## S3 Bucket Strategy (InsightHub)
+
+### Goal
+
+Store customer feedback data and analytics outputs in S3.
+
+### Buckets
+
+We will use one S3 bucket with environment separation via prefixes.
+
+**Bucket name pattern:**
+
+- `insighthub-data-...`
+
+### Partitioning approach
+
+We partition data by environment and date (year/month/day).
+
+### Data formats
+
+- **Raw:** JSON
+- **Processed:** JSON
