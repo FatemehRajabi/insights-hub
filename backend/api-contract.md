@@ -15,12 +15,6 @@ The browser sends a `POST /feedback` request to API Gateway, which triggers the 
 
 ---
 
-# API Contract – Feedback Submission
-
-This document defines the API used by the frontend to submit customer feedback to Insights Hub.
-
----
-
 ## 1. Endpoint Overview
 
 **Method:** `POST`  
@@ -38,11 +32,19 @@ The frontend sends the following JSON payload:
 
 ```json
 {
-  "rating": 4,
-  "feedback_text": "The checkout process was easy, but delivery was slow.",
+  "survey_version": "short_v1",
+  "ratings": {
+    "overall_satisfaction": 8,
+    "speed_satisfaction": 6,
+    "recommend_likelihood": 9
+  },
+  "open_text": {
+    "improve_one_thing": "Delivery was slow.",
+    "keep_doing_one_thing": "Staff were friendly."
+  },
   "topic": "delivery",
   "metadata": {
-    "browser": "Chrome",
+    "userAgent": "Mozilla/5.0 ...",
     "locale": "en-US"
   }
 }
@@ -50,13 +52,18 @@ The frontend sends the following JSON payload:
 
 2.1 Field Definitions
 
-| Field         | Type    | Required | Description                                                                    |
-| ------------- | ------- | -------- | ------------------------------------------------------------------------------ |
-| rating        | integer | yes      | Customer rating (1–5) representing satisfaction.                               |
-| feedback_text | string  | yes      | Free-text feedback provided by the customer.                                   |
-| topic         | string  | no       | Topic or area the feedback is about (e.g., `checkout`, `delivery`, `support`). |
-| metadata      | object  | no       | Optional extra data (e.g., browser info).                                      |
-
+| Field                            | Type    | Required | Description                                          |
+| -------------------------------- | ------- | -------: | ---------------------------------------------------- |
+| `survey_version`                 | string  |      yes | Survey version identifier (e.g., `short_v1`).        |
+| `ratings`                        | object  |      yes | Container for numeric ratings (1–10).                |
+| `ratings.overall_satisfaction`   | integer |      yes | Overall satisfaction score (1–10).                   |
+| `ratings.speed_satisfaction`     | integer |      yes | Speed of service/support score (1–10).               |
+| `ratings.recommend_likelihood`   | integer |      yes | Likelihood to recommend score (1–10).                |
+| `open_text`                      | object  |      yes | Container for open-ended answers.                    |
+| `open_text.improve_one_thing`    | string  |      yes | What we could do better.                             |
+| `open_text.keep_doing_one_thing` | string  |      yes | What we should keep doing.                           |
+| `topic`                          | string  |       no | Optional tag like `delivery`, `support`, `checkout`. |
+| `metadata`                       | object  |       no | Optional client context (userAgent, locale, etc.).   |
 
 The frontend does not send feedback_id, timestamp, year, month, or day.
 These are added by the Lambda function according to the defined data schema.
@@ -76,26 +83,37 @@ year, month, day (derived from timestamp)
 Write the enriched record to S3 using the defined folder structure.
 
 3.1 Example Enriched Record (written to S3)
+
 ```
 {
-  "feedback_id": "fb-20251212-0001",
-  "timestamp": "2025-12-12T15:30:45Z",
-  "rating": 4,
-  "feedback_text": "The checkout process was easy, but delivery was slow.",
+  "feedback_id": "3f7f2d7a-6c2b-4b1a-9d4c-1f2a7d9d12ab",
+  "submitted_at": "2025-12-22T15:30:45Z",
+  "survey_version": "short_v1",
+  "ratings": {
+    "overall_satisfaction": 8,
+    "speed_satisfaction": 6,
+    "recommend_likelihood": 9
+  },
+  "open_text": {
+    "improve_one_thing": "Delivery was slow.",
+    "keep_doing_one_thing": "Staff were friendly."
+  },
   "topic": "delivery",
   "metadata": {
-    "browser": "Chrome",
+    "userAgent": "Mozilla/5.0 ...",
     "locale": "en-US"
   },
   "year": "2025",
   "month": "12",
-  "day": "12"
+  "day": "22"
 }
 ```
 
 The record is stored under a date-partitioned path, for example:
 
-``` s3://insights-hub-feedback-dev/raw/year=2025/month=12/day=12/feedback-2025-12-12.json ```
+```s3://insighthub-data-.../raw/feedback/environment=demo/year=2025/month=12/day=22/<feedback_id>.json
+
+```
 
 ## 4. Validation Rules
 
@@ -138,7 +156,9 @@ Contains simple key–value pairs (e.g., strings, numbers, booleans)
 If any required field is invalid or missing, the API returns a 400 Bad Request.
 
 ## 5. Responses
+
 5.1 Success Response
+
 ```
 Status: 200 OK
 
@@ -184,6 +204,7 @@ Validates the request.
 Enriches the payload with feedback_id, timestamp, year, month, day.
 
 Writes the record into Amazon S3 under:
+
 ```
 /raw/year=YYYY/month=MM/day=DD/
 ```
