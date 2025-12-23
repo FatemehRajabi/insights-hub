@@ -69,6 +69,7 @@
 
   <script>
     const form = document.getElementById("feedback-form");
+    const API_URL = "https://vexh39kin7.execute-api.us-east-2.amazonaws.com/demo/feedback";
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -91,9 +92,28 @@
         },
       };
 
-      console.log("Feedback", payload);
-      alert("Feedback captured in browser.");
-      form.reset(); // optional: clears form after submit
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          console.error("API error:", data);
+          alert("Submission failed. Check console.");
+          return;
+        }
+
+        alert(data.message || "Feedback submitted successfully!");
+        form.reset();
+      } catch (err) {
+        console.error("Network error:", err);
+        alert("Network error. Check console.");
+      }
     });
   </script>
+
 </body>
