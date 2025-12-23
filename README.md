@@ -2,6 +2,56 @@
 
 A serverless, cloud-native application for collecting customer feedback and generating actionable insights using AWS services.
 
+# Performance Expectations (Demo Scope)
+
+The InsightHub ingestion pipeline is designed for low-volume, interactive demo traffic rather than production-scale workloads.
+
+## Expected submission latency:
+
+< 500 ms per feedback submission (end-to-end: API Gateway → Lambda → S3)
+
+## Throughput:
+
+Low volume (tens of requests per minute during demos)
+
+## Bottleneck considerations:
+
+- API Gateway request validation minimizes invalid requests
+
+- Lambda execution time expected to be short (< 1 second)
+
+# Compliance, Security & Governance Considerations
+
+The following controls ensure basic security and compliance for the capstone demo:
+
+## PII handling
+
+- The feedback form does not intentionally collect PII
+
+- Open-text fields are treated as unstructured input and stored as-is
+
+## Encryption
+
+- Data encrypted in transit via HTTPS
+
+- S3 objects encrypted at rest using SSE-S3
+
+## Access control
+
+- S3 access restricted via IAM roles
+
+- Root account locked down with MFA
+
+- Daily operations performed using role-based IAM access
+
+## Logging & monitoring
+
+- Lambda execution logs captured in Amazon CloudWatch Logs
+
+- API Gateway provides request-level metrics for monitoring
+
+- These controls are sufficient for a demo environment and can be extended for production use.
+
 ## Tech Stack
 
 Frontend: Simple HTML/JS feedback form
