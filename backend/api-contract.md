@@ -100,7 +100,7 @@ Write the enriched record to S3 using the defined folder structure.
 
 The record is stored under a date-partitioned path, for example:
 
-```s3://insighthub-data-.../raw/feedback/environment=demo/year=2025/month=12/day=22/<feedback_id>.json
+```s3://insighthub-data-insighthub-data-2025/raw/feedback/environment=demo/year=YYYY/month=MM/day=DD/<feedback_id>.json
 
 ```
 
@@ -206,7 +206,7 @@ Enriches the payload with feedback_id, timestamp, year, month, day.
 Writes the record into Amazon S3 under:
 
 ```
-/raw/year=YYYY/month=MM/day=DD/
+raw/feedback/environment=demo/year=YYYY/month=MM/day=DD/<feedback_id>.json
 ```
 
 Lambda returns a success or error response.
