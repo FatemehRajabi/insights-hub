@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Insights</title>
+    <link rel="stylesheet" href="styles.css?v=4">
+    <!-- <link rel="icon" href="data:,"> -->
+    <link rel="icon" href="data:," />
+    <link rel="shortcut icon" href="data:," />
+
+
+
+    <style>
+        /* Question hover effect */
+        .pill {
+            transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+            cursor: pointer;
+        }
+
+        .pill:hover {
+            transform: translateY(-2px);
+            background: #000;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .pill:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Clear chat at bottom */
+        .chat-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="app">
+
+        <!-- Top bar -->
+        <header class="topbar">
+            <button id="logoutBtn" class="btn btn-ghost" style="display:none;">Logout</button>
+        </header>
+
+        <!-- AUTH GATE -->
+        <section id="authGate" class="auth-gate">
+            <div class="card auth-card">
+                <h2>Login required</h2>
+                <p>Please sign in to view Insights.</p>
+                <button id="loginBtn" class="btn btn-primary">Login / Sign up</button>
+            </div>
+        </section>
+
+        <!-- INSIGHTS APP -->
+        <section id="insightsApp">
+            <h1 class="page-heading">Feedback Insights</h1>
+
+            <!-- Chat -->
+            <div class="chat card">
+                <div id="messages" class="messages"></div>
+
+                <div class="quick">
+                    <button class="q pill" data-qid="row_count">How many feedback responses?</button>
+                    <button class="q pill" data-qid="avg_overall_satisfaction">What’s the avg satisfaction?</button>
+                    <button class="q pill" data-qid="avg_recommend_likelihood">What’s the avg recommend score?</button>
+                    <button class="q pill" data-qid="top_topics">What are the top topics?</button>
+                </div>
+
+                <!-- Clear chat moved here -->
+                <div class="chat-actions">
+                    <button id="clear" type="button" class="btn btn-primary">Clear Chat</button>
+                </div>
+            </div>
+
+            <!-- Dashboard -->
+            <div class="card dashboard-card" style="margin-top:16px;">
+                <div class="dash-head">
+                    <h2 class="dashboard-title">Dashboard</h2>
+                    <p id="qsError" class="qs-error" style="display:none;"></p>
+                </div>
+
+                <iframe id="qsFrame" class="qs-frame" title="QuickSight Dashboard" allowfullscreen></iframe>
+            </div>
+
+            <div class="footer-links">
+                <a href="feedback.html">← Back to Feedback</a>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // ================= CONFIG =================
+        const COGNITO_DOMAIN = "https://us-east-2vxc7iihvb.auth.us-east-2.amazoncognito.com";
+        const CLIENT_ID = "2n7vod6u436mol6ihpdokm3313";
+        const REDIRECT_URI = "https://d210uwax0fmibn.cloudfront.net/insights.html";
+        const LOGOUT_REDIRECT = "https://d210uwax0fmibn.cloudfront.net/index.html";
+        const SCOPE = "openid email";
+
+        const QS_EMBED_URL = "https://vexh39kin7.execute-api.us-east-2.amazonaws.com/demo/qs-embed";
+        const INSIGHTS_URL = "https://vexh39kin7.execute-api.us-east-2.amazonaws.com/demo/insights";
+        const DEFAULT_DAYS = 30;
+
+        // ================= AUTH =================
+        function setUIAuthed(isAuthed) {
+            authGate.style.display = isAuthed ? "none" : "block";
+            insightsApp.style.display = isAuthed ? "block" : "none";
+            logoutBtn.style.display = isAuthed ? "inline-block" : "none";
+        }
+
+        function getSession() {
+            try {
+                const s = JSON.parse(localStorage.getItem("insights_auth"));
+                return s?.id_token ? s : null;
+            } catch {
+                return null;
+            }
+        }
+
+
+        function base64UrlEncode(bytes) {
+            return btoa(String.fromCharCode(...new Uint8Array(bytes)))
+                .replace(/\+/g, "-")
+                .replace(/\//g, "_")
+                .replace(/=+$/, "");
+        }
+
+        async function sha256(text) {
+            const data = new TextEncoder().encode(text);
+            return await crypto.subtle.digest("SHA-256", data);
+        }
+
+
+        async function startLogin() {
+            const verifier = crypto.randomUUID() + crypto.randomUUID(); // longer verifier
+            localStorage.setItem("pkce_verifier", verifier);
+
+            const hashed = await sha256(verifier);
+            const challenge = base64UrlEncode(hashed);
+
+            window.location.href =
+                `${COGNITO_DOMAIN}/oauth2/authorize` +
+                `?client_id=${CLIENT_ID}` +
+                `&response_type=code` +
+                `&scope=${encodeURIComponent(SCOPE)}` +
+                `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+                `&code_challenge=${challenge}` +
+                `&code_challenge_method=S256`;
+        }
+
+
+
+        async function exchangeCodeForTokens(code) {
+            const verifier = localStorage.getItem("pkce_verifier");
+            if (!verifier) throw new Error("Missing PKCE verifier. Please try again.");
+
+            const body = new URLSearchParams({
+                grant_type: "authorization_code",
+                client_id: CLIENT_ID,
+                code,
+                redirect_uri: REDIRECT_URI,
+                code_verifier: verifier,
+            });
+
+            const res = await fetch(`${COGNITO_DOMAIN}/oauth2/token`, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body,
+            });
+
+            const tokens = await res.json();
+
+            // IMPORTANT: show the real error
+            if (!res.ok || !tokens.id_token) {
+                console.error("Token exchange failed:", tokens);
+                localStorage.removeItem("insights_auth");
+                localStorage.removeItem("pkce_verifier");
+                throw new Error(tokens.error_description || tokens.error || "Token exchange failed");
+            }
+
+            localStorage.setItem("insights_auth", JSON.stringify(tokens));
+            localStorage.removeItem("pkce_verifier");
+        }
+
+
+
+        // ================= DASHBOARD =================
+        async function loadQuickSightDashboard() {
+            const errEl = document.getElementById("qsError");
+            const frame = document.getElementById("qsFrame");
+
+            errEl.style.display = "block";
+            errEl.textContent = "Loading dashboard...";
+
+            try {
+                const res = await fetch(QS_EMBED_URL);
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.message);
+
+                frame.src = data.embedUrl;
+
+                setTimeout(loadQuickSightDashboard,
+                    (data.expiresInMinutes - 5) * 60 * 1000);
+
+                errEl.style.display = "none";
+            } catch (e) {
+                errEl.textContent = "Dashboard error: " + e.message;
+            }
+        }
+
+        // ================= CHAT =================
+        const messagesEl = document.getElementById("messages");
+        const clearBtn = document.getElementById("clear");
+
+        function addMsg(who, text) {
+            const div = document.createElement("div");
+            div.className = `msg ${who}`;
+            div.textContent = text;
+            messagesEl.appendChild(div);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        async function ask(qid) {
+            if (!getSession()?.id_token) throw new Error("Login required");
+
+            const res = await fetch(INSIGHTS_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    questionId: qid,
+                    days: DEFAULT_DAYS,
+                    environment: "all"
+                })
+            });
+
+            const data = await res.json();
+            if (!data.ok) throw new Error(data.message);
+            return data;
+        }
+
+        function formatResult(qid, result) {
+            if (!result || typeof result !== "object") return String(result ?? "");
+
+            switch (qid) {
+                case "row_count":
+                    return `You have ${result.total_rows ?? 0} feedback responses.`;
+
+                case "avg_overall_satisfaction": {
+                    const avg = Number(result.avg_overall_satisfaction);
+                    const n = result.sample_size ?? result.total_rows ?? "";
+                    const avgText = Number.isFinite(avg) ? avg.toFixed(2) : "N/A";
+                    return `Average satisfaction: ${avgText}${n !== "" ? ` (based on ${n} responses)` : ""}.`;
+                }
+
+                case "avg_recommend_likelihood": {
+                    const avg = Number(result.avg_recommend_likelihood);
+                    const n = result.sample_size ?? result.total_rows ?? "";
+                    const avgText = Number.isFinite(avg) ? avg.toFixed(2) : "N/A";
+                    return `Average recommend score: ${avgText}${n !== "" ? ` (based on ${n} responses)` : ""}.`;
+                }
+
+                case "top_topics": {
+                    // Works with BOTH shapes:
+                    // 1) result = { top_topics: [...] }
+                    // 2) result = [ ... ]
+                    const topics = Array.isArray(result)
+                        ? result
+                        : Array.isArray(result.top_topics)
+                            ? result.top_topics
+                            : [];
+
+                    if (topics.length === 0) return "No topics found for this period.";
+
+                    const total = topics.reduce((sum, t) => sum + (Number(t.count) || 0), 0);
+
+                    const lines = topics.map((t, i) => {
+                        const name = t?.topic ?? "Unknown";
+                        const count = Number(t?.count) || 0;
+                        const pct = total ? Math.round((count / total) * 100) : 0;
+                        return `${i + 1}) ${name} — ${count} (${pct}%)`;
+                    });
+
+                    const top1 = topics[0];
+                    const top1Name = top1?.topic ?? "Unknown";
+                    const top1Count = Number(top1?.count) || 0;
+                    const top1Pct = total ? Math.round((top1Count / total) * 100) : 0;
+
+                    return (
+                        `Top topics (last ${DEFAULT_DAYS} days):\n` +
+                        lines.join("\n") +
+                        `\n\nTakeaway: "${top1Name}" is the most common theme (${top1Count}/${total}, ${top1Pct}%).`
+                    );
+                }
+
+                default:
+                    return "Done. (No formatter yet for this question.)";
+            }
+        }
+
+
+        function wireChat() {
+            document.querySelectorAll(".q").forEach(btn => {
+                btn.onclick = async () => {
+                    addMsg("user", btn.textContent);
+                    addMsg("bot", "Thinking...");
+                    const thinking = messagesEl.lastChild;
+
+                    try {
+                        const d = await ask(btn.dataset.qid);
+
+                        // Optional: debug in console, not in UI
+                        console.log("INSIGHTS RESULT:", d.result);
+
+                        // ✅ Human-readable output
+                        thinking.textContent = formatResult(btn.dataset.qid, d.result);
+                    } catch (e) {
+                        thinking.textContent = "Error: " + e.message;
+                    }
+                };
+            });
+
+            clearBtn.onclick = () => {
+                messagesEl.innerHTML = "";
+                addMsg("bot", "Hi! Pick a question below.");
+            };
+
+            addMsg("bot", "Hi! Pick a question below.");
+        }
+
+        // ================= BOOT =================
+        (async function init() {
+            const url = new URL(location.href);
+            const code = url.searchParams.get("code");
+
+            if (code) {
+                try {
+                    await exchangeCodeForTokens(code);
+                    url.searchParams.delete("code");
+                    history.replaceState({}, "", url.toString());
+                } catch (e) {
+                    alert("Login failed: " + e.message);
+                    // Clean up so it doesn't keep trying with the same bad code
+                    url.searchParams.delete("code");
+                    history.replaceState({}, "", url.toString());
+                }
+            }
+
+
+
+            const authed = !!getSession()?.id_token;
+            setUIAuthed(authed);
+
+            loginBtn.onclick = () => startLogin().catch(e => alert(e.message));
+
+            logoutBtn.onclick = () => {
+                localStorage.removeItem("insights_auth");
+                qsFrame.src = "about:blank";
+                window.location.href =
+                    `${COGNITO_DOMAIN}/logout?client_id=${CLIENT_ID}&logout_uri=${encodeURIComponent(LOGOUT_REDIRECT)}`;
+            };
+
+            if (authed) {
+                wireChat();
+                loadQuickSightDashboard();
+            }
+        })();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Feedback</title>
+    <link rel="stylesheet" href="styles.css?v=4">
+</head>
+
+<body>
+    <main class="landing">
+        <!-- Top brand bar -->
+        <!-- Top brand header -->
+        <header class="brand-header">
+            <div class="brand-inner">
+                <img src="Insights_Hub_Logo.png" alt="Insights Hub Logo" class="brand-header-logo" />
+                <div class="brand-text">
+                    <h1 class="brand-title">Insights Hub</h1>
+                    <p class="brand-tagline">Customer Feedback Analytics Platform</p>
+                </div>
+            </div>
+        </header>
+
+
+        <section class="landing-grid">
+            <!-- LEFT: your existing form card (unchanged fields/ids) -->
+            <section class="card">
+                <h1 class="page-title">Submit Feedback</h1>
+
+                <form id="feedback-form">
+                    <fieldset class="topic-group">
+                        <legend>Topic</legend>
+
+                        <label><input type="radio" name="topic" value="Product" required> Product</label>
+                        <label><input type="radio" name="topic" value="Delivery"> Delivery</label>
+                        <label><input type="radio" name="topic" value="Support"> Support</label>
+
+                        <label><input type="radio" name="topic" value="Pricing"> Pricing</label>
+                        <label><input type="radio" name="topic" value="App/Website"> Website/App</label>
+                        <label><input type="radio" name="topic" value="Checkout"> Checkout</label>
+
+                        <label><input type="radio" name="topic" value="Other"> Other</label>
+                    </fieldset>
+
+                    <p>
+                        <label for="overall_satisfaction">Overall satisfaction (1–10)</label>
+                        <input id="overall_satisfaction" name="overall_satisfaction" type="number" min="1" max="10"
+                            required>
+                    </p>
+
+                    <p>
+                        <label for="speed_satisfaction">Speed satisfaction (1–10)</label>
+                        <input id="speed_satisfaction" name="speed_satisfaction" type="number" min="1" max="10"
+                            required>
+                    </p>
+
+                    <p>
+                        <label for="recommend_likelihood">Recommend likelihood (0–10)</label>
+                        <input id="recommend_likelihood" name="recommend_likelihood" type="number" min="0" max="10"
+                            required>
+                    </p>
+
+                    <p>
+                        <label for="improve_one_thing">Improve one thing</label>
+                        <textarea id="improve_one_thing" name="improve_one_thing" rows="3"></textarea>
+                    </p>
+
+                    <p>
+                        <label for="keep_doing_one_thing">Keep doing one thing</label>
+                        <textarea id="keep_doing_one_thing" name="keep_doing_one_thing" rows="3"></textarea>
+                    </p>
+
+                    <button type="submit" class="btn-submit">
+                        Submit Feedback
+                    </button>
+
+                </form>
+
+                <p id="status"></p>
+            </section>
+
+            <!-- RIGHT: Insights + Team -->
+            <aside class="stack">
+                <section class="card card-accent">
+                    <div class="insights-hero">
+                        <img class="insights-logo" src="Insights_Hub_Logo.png" alt="Insights Hub">
+                        <div>
+                            <h2 class="side-title">Insights Dashboard</h2>
+                            <p class="side-subtitle">Sign in to view trends, averages, and top topics from submitted
+                                feedback.</p>
+                        </div>
+                    </div>
+
+                    <a class="btn-secondary" href="insights.html">Login / Sign up →</a>
+
+                </section>
+
+                <section class="card">
+                    <h2 class="side-title">Team</h2>
+                    <p class="side-subtitle">Our project team</p>
+
+                    <div class="team-grid">
+                        <div class="member">
+                            <img src="team/member1.png" alt="Member 1" class="avatar">
+                            <div>
+                                <div class="member-name">Mital Babaria</div>
+                                <div class="member-role">Project Manager</div>
+                            </div>
+                        </div>
+
+                        <div class="member">
+                            <img src="team/member2.png" alt="Member 2" class="avatar">
+                            <div>
+                                <div class="member-name">Anschel Burk</div>
+                                <div class="member-role">Business Analyst</div>
+                            </div>
+                        </div>
+
+                        <div class="member">
+                            <img src="team/member3.png" alt="Member 3" class="avatar">
+                            <div>
+                                <div class="member-name">Fatima Rajabi</div>
+                                <div class="member-role">Lead Cloud Infrastructure Developer</div>
+                            </div>
+                        </div>
+
+                        <div class="member">
+                            <img src="team/member4.png" alt="Member 4" class="avatar">
+                            <div>
+                                <div class="member-name">Henry Scott</div>
+                                <div class="member-role">Solutions Architect Support </div>
+                            </div>
+                        </div>
+
+                        <div class="member">
+                            <img src="team/member5.png" alt="Member 5" class="avatar">
+                            <div>
+                                <div class="member-name">Pavithra Shrinivasan</div>
+                                <div class="member-role">Lead Solutions Architect</div>
+                            </div>
+                        </div>
+
+                        <div class="member">
+                            <img src="team/member6.png" alt="Member 6" class="avatar">
+                            <div>
+                                <div class="member-name">Curtis Wilson</div>
+                                <div class="member-role">Cloud developer support</div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </section>
+            </aside>
+        </section>
+
+    </main>
+
+    <!-- ✅ YOUR ORIGINAL SCRIPT (unchanged) -->
+    <script>
+        const API_URL = "https://vexh39kin7.execute-api.us-east-2.amazonaws.com/demo/feedback";
+
+        const form = document.getElementById("feedback-form");
+        const statusEl = document.getElementById("status");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            statusEl.textContent = "Submitting...";
+
+            const payload = {
+                survey_version: "short_v1",
+                ratings: {
+                    overall_satisfaction: parseInt(form.overall_satisfaction.value, 10),
+                    speed_satisfaction: parseInt(form.speed_satisfaction.value, 10),
+                    recommend_likelihood: parseInt(form.recommend_likelihood.value, 10)
+                },
+                open_text: {
+                    improve_one_thing: form.improve_one_thing.value || "-",
+                    keep_doing_one_thing: form.keep_doing_one_thing.value || "-"
+                },
+
+                topic: form.querySelector('input[name="topic"]:checked')?.value,
+                metadata: {
+                    page: "feedback",
+                    user_agent: navigator.userAgent,
+                    locale: navigator.language,
+                    source: "web"
+                }
+            };
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const txt = await res.text().catch(() => "");
+                    throw new Error(txt || "Request failed");
+                }
+
+                statusEl.textContent = "Submitted successfully ✅";
+                form.reset();
+
+            } catch (err) {
+                console.error(err);
+                statusEl.textContent = "Error submitting feedback";
+            }
+        });
+    </script>
+</body>
+
+
+</html>
